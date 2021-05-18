@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat da RonDev</title>
+  <link rel="stylesheet" href="../styles/subscribeStyle.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+</head>
+<body>
+  <div class="box-login">
+    <div class="redirect"></div>
+
+    <h2 style="padding-bottom: 30px;">Subscribe Page</h2>
+
+    <div class="error-box">
+      <strong>This email already begin used</strong>
+      <div class="clear"></div>
+    </div>
+
+    <input type="text" name="username" placeholder="Type your username">
+    <input type="email" name="email" placeholder="Type your email">
+    <input type="password" name="password" placeholder="Type your password">
+    <button id="subscribe" type="submit">Subscribe</button>
+  </div>
+
+  <script type="module">
+    const baseUrl = '';
+
+    var socket = io();
+
+    $('.box-login').fadeIn(500).css('display', 'block');
+
+    $('button[id="subscribe"]').click(function(event) {
+      event.preventDefault();
+
+      let id = socket.id;
+      let username = $('input[name=username]').val();
+      let email = $('input[name=email]').val();
+      let password = $('input[name=password]').val();
+
+      if(username.length && email.length && password.length){
+        var subscribeObject = {
+          username,
+          email,
+          password,
+        };
+
+        socket.emit('subscribe', subscribeObject);
+      }
+
+      socket.on('subscribe-success', (data) => {
+        if (data.userId === socket.id) {
+          $('.redirect').append(`<META http-equiv="refresh" content="0;${baseUrl}/login"></META>`)
+        }
+      });
+
+      socket.on('subscribe-fail', (data) => {
+        if (data.userId === socket.id) {
+          $('.error-box').css('display', 'flex');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

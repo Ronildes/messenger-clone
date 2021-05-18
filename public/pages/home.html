@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat da RonDev</title>
+  <link rel="stylesheet" href="../styles/loginStyle.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+</head>
+<body>
+  <div class="box-login">
+    <div class="redirect"></div>
+
+    <h2 style="padding-bottom: 30px;">Messenger Clone</h2>
+
+    <div class="error-box">
+      <strong>This email already begin used<a href="http://localhost:3000/subscribe"> subscribe?</a></strong>
+      <div class="clear"></div>
+    </div>
+
+    <input type="email" name="email" placeholder="Type your email">
+    <input type="password" name="password" placeholder="Type your password">
+
+    <div class="login-button"><button type="submit" id="login">Login</button></div>
+    <div class="subscribe-button"><button type="submit" id="subscribe">Create Account</button></div>
+  </div>
+
+  <script type="module">
+    const baseUrl =  '';
+    var socket = io();
+
+    if(document.cookie) {
+      $('.redirect').append(`<META http-equiv="refresh" content="0;${baseUrl}/chat"></META>`)
+    }
+
+    $('.box-login').fadeIn(500).css('display', 'block');
+
+    $('button[id="subscribe"]').click(function(event) {
+      $('.redirect').append(`<META http-equiv="refresh" content="0;${baseUrl}/subscribe"></META>`)
+    })
+
+    $('button[id="login"]').click(function(event) {
+      event.preventDefault();
+
+      let id = socket.id;
+      let email = $('input[name=email]').val();
+      let password = $('input[name=password]').val();
+
+      if(email.length && password.length){
+        var messageObject = {
+          email,
+          password,
+        };
+
+        socket.emit('login', messageObject);
+      }
+    });
+
+    socket.on('login-success', (data) => {
+      if(socket.id === data.userId) {
+        document.cookie = data.token;
+        console.log(document.cookie);
+        $('.redirect').append(`<META http-equiv="refresh" content="0;${baseUrl}/chat"></META>`)
+      }
+    });
+
+    socket.on('login-fail', (data) => {
+      if(socket.id === data.userId) {
+        $('.error-box').css('display', 'flex');
+      }
+    });
+  </script>
+</body>
+</html>
